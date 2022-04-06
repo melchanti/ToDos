@@ -53,8 +53,7 @@ app.use((req, res, next) => {
 //Detect unaturhorized access to routes.
 const requiresAuthentication = (req, res, next) => {
   if (!res.locals.signedIn) {
-    console.log("Unauthroized.");
-    res.status(401).send("Unauthroized.");
+    res.redirect(302, "/users/signin");
   } else {
     next();
   }
@@ -66,7 +65,8 @@ app.get("/", (req, res) => {
 });
 
 // Render the list of todo lists
-app.get("/lists", 
+app.get("/lists",
+  requiresAuthentication,
   catchError(async (req, res) => {
     let store = res.locals.store;
     let todoLists = await store.sortedTodoLists();
@@ -93,7 +93,8 @@ app.get("/lists/new",
 );
 
 // Render individual todo list and its todos
-app.get("/lists/:todoListId", 
+app.get("/lists/:todoListId",
+  requiresAuthentication,
   catchError(async (req, res) => {
     let todoListId = req.params.todoListId;
     let todoList = await res.locals.store.loadTodoList(+todoListId);
@@ -104,7 +105,7 @@ app.get("/lists/:todoListId",
     res.render("list", {
       todoList,
       isDoneTodoList: res.locals.store.isDoneTodoList(todoList),
-      hasUndoneTodos: res.locals.store.hasUndoneTodos(todoListId),
+      hasUndoneTodos: res.locals.store.hasUndoneTodos(todoList),
     });
   })
 );
@@ -217,7 +218,7 @@ app.post("/lists/:todoListId/complete_all",
   catchError(async (req, res) => {
   let todoListId = req.params.todoListId;
   
-  let completed = await res.locals.store.completeAll(+todoListId);
+  let completed = await res.locals.store.completeAllTodos(+todoListId);
   if (!completed) throw new Error("Not found.");
 
   req.flash("success", "All todos have been marked as done.");
@@ -333,13 +334,14 @@ app.post("/lists/:todoListId/edit",
   })
 );
 
-//user sign in
+//Handle Sign In form submission
 app.post("/users/signin",
-  (req, res, next) => {
+  catchError( async (req, res) => {
+    let store = res.locals.store;
     let username = req.body.username.trim();
     let password = req.body.password;
 
-    if (!(username === "admin" && password === "secret")) {
+    if (!await store.authenticate(username, password)) {
       req.flash("error", "Inalid credentials.");
       res.render("signin", {
         flash: req.flash(),
@@ -351,7 +353,7 @@ app.post("/users/signin",
       req.flash("success", "Welcome!");
       res.redirect("/lists");
     }
-  }
+  })
 );
 
 // Error handler

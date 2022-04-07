@@ -1,6 +1,6 @@
 CREATE TABLE todolists (
   id serial PRIMARY KEY,
-  title text NOT NULL UNIQUE
+  title text NOT NULL UNIQUE,
   username text NOT NULL
 );
 
@@ -11,7 +11,7 @@ CREATE TABLE todos (
   username TEXT NOT NULL,
   todoList_id integer
     NOT NULL
-    REFERENCEs todoList(id)
+    REFERENCEs todoLists(id)
     ON DELETE CASCADE
 );
 

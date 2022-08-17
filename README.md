@@ -5,4 +5,4 @@ This application uses postgresql to store the data and express to manipulate and
 
 The application is deployed at https://immense-gorge-00808.herokuapp.com/.
 
-I haven't created the sign up page. In order to login, use the username "admin" and the password "secret".
+To login, use the username "admin" and the password "secret".

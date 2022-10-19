@@ -93,6 +93,13 @@ app.get("/lists/new",
   }
 );
 
+// Reneder signup
+app.get("/signup",
+  (req, res) => {
+    res.render("signup");
+  }
+);
+
 // Render individual todo list and its todos
 app.get("/lists/:todoListId",
   requiresAuthentication,
